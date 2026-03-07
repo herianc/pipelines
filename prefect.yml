@@ -1,0 +1,35 @@
+# Welcome to your prefect.yml file!
+# This file is where you can define all of the metadata and configurations
+# for your deployments.
+#
+# Deployments are the fundamental unit of execution in Prefect.
+# A deployment is a serving of a flow, which is a Prefect-wrapped Python function.
+#
+# You can have multiple deployments for the same flow, but each deployment
+# must have a unique name.
+#
+# For more information on configuring deployments, including customizing
+# work pools and other settings, refer to the documentation:
+#
+# https://docs.prefect.io/latest/guides/prefect-yml/
+
+# File for storing deployment specifications
+deployments:
+  - name: "Bitcoin Price Monitor"
+    version: "1.0"
+    tags: ["monitoring", "crypto"]
+    description: "Monitors the price of Bitcoin and sends a message to a Discord channel."
+    entrypoint: main.py:main
+    work_pool:
+      name: default-agent-pool
+      work_queue_name: default
+      job_variables:
+        python_version: "3.12"
+
+build:
+  - prefect.deployments.steps.run_shell_script:
+      script: "uv sync --no-dev --no-editable --no-lock"
+
+push:
+  - prefect.deployments.steps.run_shell_script:
+      script: "echo 'Done!'"
