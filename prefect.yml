@@ -14,6 +14,9 @@
 # https://docs.prefect.io/latest/guides/prefect-yml/
 
 # File for storing deployment specifications
+build: null
+push: null
+
 deployments:
   - name: "Bitcoin Price Monitor"
     version: "1.0"
@@ -24,15 +27,6 @@ deployments:
       name: default-agent-pool
       work_queue_name: default
       job_variables:
-        python_version: "3.13"
-
-build:
-  - prefect.deployments.steps.run_shell_script:
-      script: "pip install uv -U"
-
-  - prefect.deployments.steps.run_shell_script:
-      script: "uv sync --no-dev --no-editable"
-
-push:
-  - prefect.deployments.steps.run_shell_script:
-      script: "echo 'Done!'"
+        python_version: "3.12"
+    job_variables:
+      pip_packages: ["requests"]
