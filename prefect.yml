@@ -28,6 +28,9 @@ deployments:
 
 build:
   - prefect.deployments.steps.run_shell_script:
+      script: "pip install uv -U"
+
+  - prefect.deployments.steps.run_shell_script:
       script: "uv sync --no-dev --no-editable"
 
 push:
