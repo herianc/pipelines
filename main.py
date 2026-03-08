@@ -1,12 +1,9 @@
 from datetime import datetime, timedelta
 
 import requests
-from dotenv import load_dotenv
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect.schedules import Interval
-
-load_dotenv()
 
 API_TOKEN = Secret.load("freecryptoapi-key").get()
 WEBHOOK_URL = Secret.load("bitcoio-channel-webhook").get()

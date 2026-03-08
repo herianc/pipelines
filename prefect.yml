@@ -24,11 +24,11 @@ deployments:
       name: default-agent-pool
       work_queue_name: default
       job_variables:
-        python_version: "3.12"
+        python_version: "3.13"
 
 build:
   - prefect.deployments.steps.run_shell_script:
-      script: "uv sync --no-dev --no-editable --no-lock"
+      script: "uv sync --no-dev --no-editable"
 
 push:
   - prefect.deployments.steps.run_shell_script:
