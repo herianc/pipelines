@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
+import pytz
 import requests
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from prefect.schedules import Interval
 
 API_TOKEN = Secret.load("freecryptoapi-key").get()
 WEBHOOK_URL = Secret.load("bitcoio-channel-webhook").get()
@@ -26,15 +26,15 @@ def get_bitcoin_price():
         message_content["current_price"] = bitcoin_data["last"]
         message_content["highest"] = bitcoin_data["highest"]
         message_content["lowest"] = bitcoin_data["lowest"]
-        message_content["current_datetime"] = datetime.now().strftime(
-            "%d/%m/%Y %H:%M:%S"
-        )
+        message_content["current_datetime"] = datetime.now(
+            tz=pytz.timezone("America/Sao_Paulo")
+        ).strftime("%Y-%m-%d %H:%M:%S")
         message_content["percentage_change"] = (
             float(bitcoin_data["daily_change_percentage"]) * 100
         )
         return message_content
     else:
-        raise Exception(f"Erro ao obter dados do Bitcoin: {response.status_code}")
+        raise Exception(f"Erro ao obter dados do Bitcoin: STATUS CODE {response.status_code}")
 
 
 @task
@@ -64,17 +64,17 @@ def send_message(content):
 
 
 @flow
-def main():
+def cripto_monitor():
     message_data = get_bitcoin_price()
     send_message(message_data, wait_for=[message_data])
 
 
 if __name__ == "__main__":
-    main.serve(
-        name="Bitcoin Price Monitor",
-        schedule=Interval(
-            timedelta(minutes=5),
-            anchor_date=datetime(2026, 3, 7, 1, 30, 0),
-            timezone="America/Sao_Paulo",
-        ),
+    cripto_monitor.from_source(
+        source="https://github.com/herianc/pipelines.git", entrypoint="main.py:main"
+    ).deploy(
+        name="crypto-monitor-managed",
+        work_pool_name="default-work-pool",
+        interval=timedelta(minutes=5),
+        job_variables={"pip_packages": ["requests>=2.32.5"]},
     )
