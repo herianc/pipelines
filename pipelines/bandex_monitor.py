@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
 import pytz
@@ -103,5 +103,5 @@ if __name__ == "__main__":
             CronSchedule(cron="0 8 * * 1-5", timezone="America/Sao_Paulo"),
             CronSchedule(cron="0 14 * * 1-5", timezone="America/Sao_Paulo"),
         ],
-        job_variables={"pip_packages": ["pandas>=3.0.2"]},
+        job_variables={"pip_packages": ["pandas>=3.0.2", "requests>=2.32.5"]},
     )
