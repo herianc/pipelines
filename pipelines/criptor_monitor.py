@@ -39,7 +39,6 @@ def get_bitcoin_price():
 
 @task
 def send_message(content):
-
     message = (
         "## Monitoramento de Preço do Bitcoin 💰️\n"
         f"* 🪙 1 BTC = ${content['current_price']}\n"
@@ -72,7 +71,7 @@ def cripto_monitor():
 if __name__ == "__main__":
     cripto_monitor.from_source(
         source="https://github.com/herianc/pipelines.git", 
-        entrypoint="main.py:cripto_monitor"
+        entrypoint="pipelines/main.py:cripto_monitor"
     ).deploy(
         name="crypto-monitor-managed",
         work_pool_name="default-work-pool",
