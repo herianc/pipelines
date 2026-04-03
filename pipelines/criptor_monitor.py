@@ -4,6 +4,8 @@ import pytz
 import requests
 from prefect import flow, task
 from prefect.blocks.system import Secret
+from prefect.client.schemas.schedules import CronSchedule
+
 
 API_TOKEN = Secret.load("freecryptoapi-key").get()
 WEBHOOK_URL = Secret.load("bitcoio-channel-webhook").get()
@@ -75,6 +77,6 @@ if __name__ == "__main__":
     ).deploy(
         name="crypto-monitor-managed",
         work_pool_name="default-work-pool",
-        interval=timedelta(minutes=5),
+        schedules=[CronSchedule(cron="0 12 * * *", timezone="America/Sao_Paulo")],
         job_variables={"pip_packages": ["requests>=2.32.5"]},
     )
