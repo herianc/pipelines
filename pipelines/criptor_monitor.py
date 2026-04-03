@@ -71,7 +71,7 @@ def cripto_monitor():
 if __name__ == "__main__":
     cripto_monitor.from_source(
         source="https://github.com/herianc/pipelines.git", 
-        entrypoint="pipelines/main.py:cripto_monitor"
+        entrypoint="pipelines/criptor_monitor.py:cripto_monitor"
     ).deploy(
         name="crypto-monitor-managed",
         work_pool_name="default-work-pool",

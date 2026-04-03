@@ -95,7 +95,7 @@ def bandex_alert():
 if __name__ == "__main__":
     bandex_alert.from_source(
         source="https://github.com/herianc/pipelines.git",
-        entrypoint="pipelines/main.py:bandex_alert",
+        entrypoint="pipelines/bandex_monitor.py:bandex_alert",
     ).deploy(
         name="bandex-alert",
         work_pool_name="default-work-pool",
