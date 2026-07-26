@@ -7,12 +7,15 @@ from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect.client.schemas.schedules import CronSchedule
 
+
+WAHA_API_KEY = Secret.load("waha-api-key").get()
+GROUP_ID = Secret.load("whatsapp-group-id").get()
+URL = "https://aurah.cloud/api/sendText/" 
 SHEET_ID = "1YvCqBrNw5l4EFNplmpRBFrFJpjl4EALlVNDk3pwp_dQ"
 GID = "0"
 SHEET_URL = (
     f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
 )
-DISCORD_WEBHOOK_URL = Secret.load("bandex-alert-channel").get()
 
 
 @task
@@ -41,7 +44,7 @@ def get_semanal_menu():
         start, end = 8, 15
 
     menu_list = df.iloc[start:end, column_day].to_list()
-    menu_list = [item.strip().replace("  ", "") for item in menu_list]
+    menu_list = [item.strip().replace("\n", " ").replace("  ", "") for item in menu_list]
 
     menu = {
         "entry": menu_list[0],
@@ -55,7 +58,7 @@ def get_semanal_menu():
     return {
         "day_of_week": day_of_week,
         "meal": meal,
-        "current_date": current_date.strftime("%d/%m/%Y"),
+        "current_date": current_date.strftime("%d/%m/%y"),
         "menu": menu,
     }
 
@@ -63,27 +66,33 @@ def get_semanal_menu():
 @task
 def send_message(content):
     message = (
-        f"# {content['day_of_week']} - {content['meal']} - {content['current_date']}",
-        f"* 🥗 **Entrada**: {content['menu']['entry']}",
-        f"* 🍲 **Prato Principal**: {content['menu']['main_course']}",
-        f"* 🥦 **Prato Vegano**: {content['menu']['vegan_course']}",
-        f"* 🥘 **Guarnição**: {content['menu']['side_dish']}",
-        f"* 🍚 **Acompanhamentos**: {content['menu']['accompaniment']}",
-        f"* 🍎 **Sobremesa**: {content['menu']['dessert']}",
+        f" *{content['day_of_week']} - {content['current_date']} - {content['meal']}*",
+        f"- 🥗 *Entrada*: {content['menu']['entry']}",
+        f"- 🍲 *Prato Principal*: {content['menu']['main_course']}",
+        f"- 🥦 *Prato Vegano*: {content['menu']['vegan_course']}",
+        f"- 🥘 *Guarnição*: {content['menu']['side_dish']}",
+        f"- 🍚 *Acompanhamentos*: {content['menu']['accompaniment']}",
+        f"- 🍎 *Sobremesa*: {content['menu']['dessert']}",
     )
     message = "\n".join(message)
 
-    payload = {
-        "content": message,
-        "username": "Bandex Bot",
+
+    headers = {
+        "X-api-Key": WAHA_API_KEY,
+        "Accept": "application/json",
+        "Content-Type": "application/json"
     }
 
-    response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+    payload = {
+        "session": "default",
+        "chatId": GROUP_ID,
+        "text": message
+    }
 
-    if response.status_code == 204:
-        print("Mensagem enviada com sucesso!")
-    else:
-        print(f"Erro ao enviar: {response.status_code}")
+    response = requests.post(url=URL, json=payload, headers=headers)
+
+    if response.status_code != 201:
+        raise Exception(status_code= response.status_code, message=response.json())
 
 
 @flow
@@ -100,8 +109,8 @@ if __name__ == "__main__":
         name="bandex-alert",
         work_pool_name="default-work-pool",
         schedules=[
-            CronSchedule(cron="0 8 * * 1-5", timezone="America/Sao_Paulo"),
-            CronSchedule(cron="0 14 * * 1-5", timezone="America/Sao_Paulo"),
+            CronSchedule(cron="0 8 * * 1-5", timezone="America/Sao_Paulo"), # Segunda a Sexta as 8hrs
+            CronSchedule(cron="0 15 * * 1-5", timezone="America/Sao_Paulo"), # Segunda a Sexta as 15hrs
         ],
         job_variables={"pip_packages": ["pandas>=3.0.2", "requests>=2.32.5"]},
     )
