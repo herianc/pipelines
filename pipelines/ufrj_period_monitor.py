@@ -127,7 +127,7 @@ def check_dates_and_format_message(dates: dict, translation: str):
         lines = [
             f'🎓️ Período Letivo 2026.2',
             f'🗓️ Inicio: {start_date.strftime("%d/%m/%y")} - Fim: {end_date.strftime("%d/%m/%y")}\n',
-            f"Você cursou **{days_completed} dias** ({percentual_completed}%) e ainda restam **{days_remaining_period} dias** para o fim do período.\n",
+            f"Você cursou `{days_completed}` dias ({percentual_completed}%) e ainda restam `{days_remaining_period}` dias para o fim do período.\n",
         ]
 
     # Mensagem final
@@ -184,6 +184,6 @@ if __name__ == "__main__":
     ).deploy(
         name="ufrj-period-monitor-managed",
         work_pool_name="default-work-pool",
-        schedules=[CronSchedule(cron="0 20 * * 1-5", timezone="America/Sao_Paulo")], # Segunda a Sexta as 20hrs
+        schedules=[CronSchedule(cron="0 19 * * 1-5", timezone="America/Sao_Paulo")], # Segunda a Sexta as 19hrs
         job_variables={"pip_packages": ["requests>=2.32.5"]},
     )
