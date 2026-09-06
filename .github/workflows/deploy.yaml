@@ -37,7 +37,7 @@ jobs:
         run: uv python install 3.13
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --no-install-project
 
       - name: Deploy to Prefect Cloud
         env:
