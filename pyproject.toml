@@ -1,14 +1,24 @@
 [project]
 name = "pipelines"
 version = "0.1.0"
-description = "Add your description here"
+description = "Automações"
 readme = "README.md"
+authors = [
+    { name = "Herian", email = "herian.cavalcante@live.com" }
+]
 requires-python = ">=3.13"
 dependencies = [
     "pandas>=3.0.2",
     "prefect>=3.6.21",
     "requests>=2.32.5",
 ]
+
+[project.scripts]
+pipelines = "pipelines:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
