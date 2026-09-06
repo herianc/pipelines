@@ -1,0 +1,53 @@
+name: Deploy Prefect Flows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pipelines/**'
+      - 'prefect.yaml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+    inputs:
+      deployment_name:
+        description: 'Nome do deployment específico a fazer deploy (deixe em branco para todos)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  deploy:
+    name: Deploy to Prefect Cloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Deploy to Prefect Cloud
+        env:
+          PREFECT_API_KEY: ${{ secrets.PREFECT_API_KEY }}
+          PREFECT_API_URL: ${{ secrets.PREFECT_API_URL }}
+        run: |
+          if [ -n "${{ inputs.deployment_name }}" ]; then
+            echo "Realizando deploy do deployment específico: ${{ inputs.deployment_name }}"
+            uv run prefect deploy --name "${{ inputs.deployment_name }}"
+          else
+            echo "Realizando deploy de todos os flows declarados em prefect.yaml"
+            uv run prefect deploy --all
+          fi

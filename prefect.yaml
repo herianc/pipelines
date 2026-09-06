@@ -1,0 +1,59 @@
+# generic metadata
+prefect-version: 3.6.21
+name: pipelines
+
+# preparation steps
+build: null
+push: null
+
+# runtime steps
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: "https://github.com/herianc/pipelines.git"
+      branch: "main"
+
+# deployment configurations
+deployments:
+
+  - name: bandex-alert
+    version: null
+    tags: ['ufrj', 'bandex']
+    description: 'Envia o cardápio diário do bandejão para o Whatsapp.'
+    entrypoint: "pipelines/bandex_monitor.py:bandex_alert"
+    parameters: {}
+    schedules:
+      - cron: "0 8 * * 1-5"
+        timezone: "America/Sao_Paulo"
+      - cron: "0 15 * * 1-5"
+        timezone: "America/Sao_Paulo"
+    work_pool:
+      name: default-work-pool
+      work_queue_name: null
+      job_variables: {"pip_packages": ["pandas>=3.0.2", "requests>=2.32.5"]}
+
+  - name: ufrj-period-monitor-managed
+    version: null
+    tags: ['ufrj', 'period-monitor']
+    description: 'Faz a contagem de dias letivos e envia para o Whatsapp.'
+    entrypoint: "pipelines/ufrj_period_monitor.py:ufrj_period_monitor"
+    schedules:
+      - cron: "0 19 * * 1-5" # Segunda a Sexta as 19hrs
+        timezone: "America/Sao_Paulo"
+    work_pool:
+      name: default-work-pool
+      work_queue_name: null
+      job_variables: {"pip_packages": ["requests>=2.32.5"]}
+
+  - name: crypto-monitor-managed
+    version: null
+    tags: ['bitcoin']
+    description: 'Monitora o preço do Bitcoin e envia para o webhook do canal.'
+    entrypoint: "pipelines/criptor_monitor.py:cripto_monitor"
+    parameters: {}
+    schedules:
+      - cron: "0 12 * * *"
+        timezone: "America/Sao_Paulo"
+    work_pool:
+      name: default-work-pool
+      work_queue_name: null
+      job_variables: {"pip_packages": ["requests>=2.32.5"]}
